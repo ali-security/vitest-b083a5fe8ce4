@@ -2,8 +2,9 @@ import { expect, test } from 'vitest'
 import { runVitestCli } from '../../test-utils'
 
 const [nvMajor, nvMinor] = process.versions.node.split('.').map(Number)
+// Type stripping is unflagged from Node 22.18.0 onward as well as 23.6+/24+.
 const isTypeStrippingSupported
-  = (nvMajor === 23 && nvMinor >= 6) || nvMajor >= 24
+  = (nvMajor === 22 && nvMinor >= 18) || (nvMajor === 23 && nvMinor >= 6) || nvMajor >= 24
 
 test('configLoader default', async () => {
   const { vitest, exitCode } = await runVitestCli(

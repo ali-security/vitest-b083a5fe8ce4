@@ -44,6 +44,12 @@ const isVm = process.execArgv.includes('--experimental-vm-modules')
 
 test('imports from "data:application/wasm" URI without explicit encoding fail', async () => {
   const error = await getError(() => import(`data:application/wasm,${wasmFileBuffer.toString('base64')}`))
+  // Newer V8 reports the failing entry point as `WebAssembly.Module()` where
+  // older builds reported `WebAssembly.compile()`; normalize so the inline
+  // snapshots stay runtime-agnostic.
+  if (error instanceof Error) {
+    error.message = error.message.replace('WebAssembly.Module()', 'WebAssembly.compile()')
+  }
   if (isVm) {
     expect(error).toMatchInlineSnapshot(`[Error: Missing data URI encoding]`)
   }
@@ -55,6 +61,12 @@ test('imports from "data:application/wasm" URI without explicit encoding fail', 
 test('imports from "data:application/wasm" URI with invalid encoding fail', async () => {
   // @ts-expect-error import is not typed
   const error = await getError(() => import('data:application/wasm;charset=utf-8,oops'))
+  // Newer V8 reports the failing entry point as `WebAssembly.Module()` where
+  // older builds reported `WebAssembly.compile()`; normalize so the inline
+  // snapshots stay runtime-agnostic.
+  if (error instanceof Error) {
+    error.message = error.message.replace('WebAssembly.Module()', 'WebAssembly.compile()')
+  }
   if (isVm) {
     expect(error).toMatchInlineSnapshot(`[Error: Invalid data URI encoding: charset=utf-8]`)
   }
